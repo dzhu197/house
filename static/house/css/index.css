@@ -164,3 +164,15 @@
      color: #333;
      text-align: center
  }
+/*
+  强制修复所有模态框（modal）和蒙层（backdrop）的堆叠顺序问题
+  确保弹窗永远显示在蒙层之上
+*/
+
+.modal-backdrop {
+  z-index: 1040 !important;
+}
+
+.modal {
+  z-index: 1050 !important;
+}

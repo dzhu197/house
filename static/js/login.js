@@ -1,3 +1,6 @@
+// 文件路径: static/js/login.js
+// 这是一个完全修正后的版本，请用它替换您原来的文件内容。
+
 $(document).ready(function () {
 
     // 注册
@@ -48,15 +51,24 @@ $(document).ready(function () {
                 success: function (result) {
                     if (result['valid'] == '0') {
                         alert(result['msg']); // 注册失败，提示错误信息
-                        // 销毁验证，以便下次可以重新验证
                         $("#registeform").data('bootstrapValidator').destroy();
                         $('#registeform').data('bootstrapValidator', null);
                     } else {
-                        // *** 修改开始: 注册成功后直接跳转到登录模态框 ***
+                        // *** 关键修复开始 ***
                         alert(result['msg']); // 提示注册成功
-                        $('#register').modal('hide'); // 关闭注册模态框
-                        $('#login').modal('show'); // 打开登录模态框
-                        // *** 修改结束 ***
+
+                        // 1. 使用正确的ID ('#register-modal') 来隐藏注册弹窗
+                        $('#register-modal').modal('hide');
+
+                        // 2. 监听注册弹窗“完全隐藏后”的事件
+                        $('#register-modal').on('hidden.bs.modal', function (e) {
+                            // 3. 在它完全隐藏后，再用正确的ID ('#login-modal') 安全地显示登录弹窗
+                            //    这可以避免两个弹窗的蒙层冲突
+                            $('#login-modal').modal('show');
+                            // 4. 解除本次事件绑定，避免下次重复触发
+                            $(this).off('hidden.bs.modal');
+                        });
+                        // *** 关键修复结束 ***
                     }
                 },
             })
@@ -94,15 +106,12 @@ $(document).ready(function () {
                 dataType: 'json',
                 success: function (result) {
                     if (result['valid'] == '0') {
-                        alert(result['msg']); // 登录失败，提示错误信息
-                        // 销毁验证
+                        alert(result['msg']); // 登录失败
                         $("#loginform").data('bootstrapValidator').destroy();
                         $('#loginform').data('bootstrapValidator', null);
                     } else {
-                        // *** 修改开始: 登录成功后刷新当前页面 ***
-                        // 后端会设置好 session，刷新后导航栏会显示用户名
+                        // 登录成功后刷新当前页面
                         window.location.reload();
-                        // *** 修改结束 ***
                     }
                 },
             })
@@ -111,14 +120,13 @@ $(document).ready(function () {
 
     // 退出
     $("#logout").on('click', function (e) {
-        e.preventDefault(); // 阻止链接的默认跳转行为
+        e.preventDefault();
         $.ajax({
             url: '/logout',
             type: 'get',
             dataType: 'json',
             success: function (res) {
                 if (res["valid"] == '1') {
-                    // 退出成功，刷新页面
                     window.location.href = '/';
                 } else {
                     alert(res["msg"]);

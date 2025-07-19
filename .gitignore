@@ -1,0 +1,15 @@
+# .gitignore
+
+# 忽略存储敏感环境变量的文件
+.env
+
+# 忽略Python的缓存文件和文件夹
+__pycache__/
+*.pyc
+
+# 忽略虚拟环境文件夹 (如果使用)
+venv/
+.venv/
+
+# 忽略IDE配置文件
+.idea/

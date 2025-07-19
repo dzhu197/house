@@ -1,5 +1,9 @@
+# models.py
+
 from flask_sqlalchemy import SQLAlchemy
 
+# 这已经是解决循环导入问题的正确模式
+# This is already the correct pattern to solve the circular import issue
 db = SQLAlchemy()
 
 class HouseInfo(db.Model):
@@ -40,7 +44,7 @@ class UserInfo(db.Model):
     # Password length set to 255 to store encrypted hash
     password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    # --- 以下为根据您的截图进行的修正 ---
+
     # --- The following are corrections based on your screenshot ---
     addr = db.Column(db.String(100))
     collect_id = db.Column(db.String(250))
