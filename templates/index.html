@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+{% block body %}
+<!-- 引入页面单独的样式 -->
+<link rel="stylesheet" href="/static/house/css/index.css">
+
+<!-- Page Header -->
+<header class="masthead" style="background-image: url('/static/img/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-md-10 mx-auto">
+                <div class="site-heading">
+                    <h1>二手好房</h1>
+                    <span class="subheading">给您推荐优质房源</span>
+                    <!--智能搜索功能-->
+                    <div>
+                        <ul class="nav nav-tabs my-nav-tab" style="margin:15px 0 0 0">
+                            <li class="chanle1 active"><span>地区搜索</span></li>
+                            <li class="chanle2"><span>户型搜索</span></li>
+                        </ul>
+                        <form class="form-inline" role="form" id="my-form" action="{{ url_for('list_page.house_list') }}" method="GET">
+                            <div class="form-group">
+                                <label class="sr-only" for="txt">名称</label>
+                                <input type="text" class="form-control" id="txt" name='addr'
+                                    placeholder="请输入区域、商圈或小区名开始找房">
+                            </div>
+                            <button type="submit" class="my-btn btn btn-info" id="btn">提交</button>
+                            <ul id="list" class="list-group"></ul>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container">
+    <!-- "为您为家" 模块现在展示最新房源 -->
+    <div class="row info-line">
+        <div class="col-lg-12 tj-header">
+            <h3>为您为家</h3>
+            <div class="describe">
+                <span>最新发布的房源，为您抢占先机</span>
+                <span class="float-right"><a href="{{ url_for('list_page.house_list') }}"
+                        style="color: #3498db; padding-right: 5px">更多房源</a></span>
+            </div>
+        </div>
+        <!-- 循环展示最新房源 -->
+        {% for house in newest_houses %}
+        <div class="col-lg-4 col-md-6">
+            <div class="course">
+                <div><a href="{{ url_for('detail_page.house_detail', house_id=house.id) }}"><img class='img-fluid img-box' src="/static/img/house-bg1.jpg" alt="房源图片"></a></div>
+                <div class="course-info">
+                    <span>{{ house.region or '未知区域' }} | {{ house.title }}</span>
+                </div>
+                <div class="course-info1">
+                    <span>{{ house.rooms }} - {{ house.area }}平方米</span>
+                    <span class="price float-right">￥&nbsp;{{ house.price }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <hr>
+
+    <!-- "为您推荐" 模块，展示热门房源 -->
+    <div class="row info-line">
+        <div class="col-lg-12 tj-header">
+            <h3>为您推荐</h3>
+            <div class="describe">
+                <span>热点房源，我们为您精选</span>
+            </div>
+        </div>
+        <!-- 循环展示热门房源 -->
+        {% for house in popular_houses %}
+        <div class="col-lg-4 col-md-6">
+            <div class="course">
+                <div><a href="{{ url_for('detail_page.house_detail', house_id=house.id) }}"><img class='img-fluid img-box' src="/static/img/house-bg2.jpeg" alt="房源图片"></a></div>
+                <div class="course-info">
+                    <span>{{ house.region or '未知区域' }} | {{ house.title }}</span>
+                </div>
+                <div class="course-info1">
+                    <span>{{ house.rooms }} - {{ house.area }}平方米</span>
+                    <span class="price float-right">￥&nbsp;{{ house.price }}</span>
+                </div>
+                <!-- *** 修改开始: 新增浏览量显示 *** -->
+                <div class="course-info1" style="color: #868e96;">
+                    <span><i class="fa fa-eye"></i> {{ house.page_views or 0 }} 人看过</span>
+                </div>
+                <!-- *** 修改结束 *** -->
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <hr>
+</div>
+
+<script>
+$(document).ready(function(){
+    $('.my-nav-tab li').on('click', function(){
+        $('.my-nav-tab li').removeClass('active');
+        $(this).addClass('active');
+
+        var searchInput = $('#txt');
+
+        if ($(this).hasClass('chanle1')) {
+            searchInput.attr('name', 'addr');
+            searchInput.attr('placeholder', '请输入区域、商圈或小区名开始找房');
+        } else if ($(this).hasClass('chanle2')) {
+            searchInput.attr('name', 'rooms');
+            searchInput.attr('placeholder', '请输入户型开始找房，例如：3室1厅');
+        }
+    });
+});
+</script>
+{% endblock %}

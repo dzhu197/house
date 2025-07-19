@@ -1,0 +1,179 @@
+{% extends "layout.html" %}
+{% block body %}
+<link rel="stylesheet" href="/static/house/css/user.css">
+<!-- 为表单增加一些内边距和样式 -->
+<style>
+    .user-info-form {
+        background-color: #f8f9fa;
+        padding: 25px;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
+    .form-group label {
+        font-weight: bold;
+        color: #495057;
+    }
+</style>
+
+<header class="masthead no-margin-bottom" style="background-color: #fff; min-height: 500px">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row ">
+            <div class="col-lg-8 col-md-8 mx-auto detail-body">
+                <ul class="nav nav-tabs" style="margin:10px 0 30px">
+                    <li class="active chanle1"><a href="#userinfo">基本资料</a></li>
+                    <li class="chanle2"><a href="#collections">房源收藏</a></li>
+                </ul>
+
+                {% if user %}
+                <!-- 个人信息表单 -->
+                <div class="user-info">
+                    <form id="update-profile-form" class="user-info-form">
+                        <div class="form-group row">
+                            <label for="name" class="col-sm-2 col-form-label">昵称:</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="addr" class="col-sm-2 col-form-label">住址:</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="addr" name="addr" value="{{ user.addr or '' }}" placeholder="请输入您的地址">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="password" class="col-sm-2 col-form-label">密码:</label>
+                            <div class="col-sm-10">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="如需修改请输入新密码，留空则不修改">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="email" class="col-sm-2 col-form-label">邮箱:</label>
+                            <div class="col-sm-10">
+                                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-12">
+                                <button type="submit" class="btn btn-primary btn-block mt-3">提交</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 收藏列表 -->
+                <div class="collection" style="display: none;">
+                    {% if collected_houses %}
+                        {% for house in collected_houses %}
+                        <div class="row collection-line" id="collect-{{ house.id }}">
+                            <span class="collect_off" id="">取消收藏</span>
+                            <div class="col-lg-4 col-md-4 mx-auto">
+                                <div>
+                                    <a href="{{ url_for('detail_page.house_detail', house_id=house.id) }}">
+                                        <img class='img-fluid img-box' src="/static/img/house-bg1.jpg" alt="">
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 mx-auto">
+                                <div class="collection-line-info">
+                                    <div><span class="attribute-text">房源地址：</span>&nbsp;<span class="info-text">{{ house.address }}</span></div>
+                                    <div><span class="attribute-text">建筑面积：</span>&nbsp;<span class="info-text">{{ house.area }}平方米</span></div>
+                                    <div><span class="attribute-text">房源户型：</span>&nbsp;<span class="info-text">{{ house.rooms }}</span></div>
+                                    <div><span class="attribute-text">房源朝向：</span>&nbsp;<span class="info-text">{{ house.direction }}</span></div>
+                                    <div><span class="attribute-text">房源价格：</span>&nbsp;<span class="info-text" style="color: #e74c3c">￥&nbsp;{{ house.price }}</span></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-2 mx-auto" style="height: 100px; margin-top: 40px;">
+                                <div class="info-more" style="width: 100%; height: 100%; position: relative; overflow: hidden;">
+                                    <span><a href="{{ url_for('detail_page.house_detail', house_id=house.id) }}" style="position: absolute; top:-30px; left: -1px; height: 20px;"><i class="fa fa-arrow-right" aria-hidden="true"></i></a></span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <p class="text-center mt-3">您还没有收藏任何房源。</p>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="user-info">
+                    <p>无法加载用户信息，请先登录。</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 浏览记录 -->
+            <div class="col-lg-4 col-md-4 mx-auto detail-body">
+                 <div class="row browse-record">
+                    <div class="col-lg-10 col-md-10 mx-auto">
+                        <h3 style="margin:20px 0 15px">浏览记录</h3>
+                    </div>
+                    <div class="col-lg-10 col-md-10 mx-auto del-btn">
+                        <span id="del">清空浏览记录</span>
+                    </div>
+                    <div style="overflow: scroll; height:680px;">
+                        {% if seen_houses %}
+                            {% for house in seen_houses %}
+                            <div class="col-lg-10 col-md-10 mx-auto browse-record-first-div">
+                                <div class="course">
+                                    <div><a href="{{ url_for('detail_page.house_detail', house_id=house.id) }}"><img class='img-fluid img-box' src="/static/img/house-bg1.jpg" alt=""></a></div>
+                                    <div class="course-info">
+                                        <span class="glyphicon glyphicon-map-marker"></span>
+                                        <span>{{ house.title }}</span>
+                                    </div>
+                                    <div class="course-info1">
+                                        <span>{{ house.rooms }} - {{ house.area }}平方米</span>
+                                        <span class="price">￥&nbsp;{{ house.price }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                        <p class="text-center mt-3">您还没有浏览任何房源。</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<script>
+$(document).ready(function() {
+    // 表单提交逻辑
+    $('#update-profile-form').on('submit', function(e) {
+        e.preventDefault(); // 阻止表单默认提交
+
+        $.ajax({
+            type: 'POST',
+            url: '/user/update', // 使用更新接口
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(response) {
+                alert(response.msg);
+                if (response.success) {
+                    // 更新成功，跳转到首页让用户重新登录
+                    window.location.href = "/";
+                }
+            },
+            error: function() {
+                alert('请求失败，请检查网络或稍后再试。');
+            }
+        });
+    });
+
+    // 保留您原有的页签切换逻辑
+    $(".nav-tabs li").click(function (e) {
+        e.preventDefault();
+        let status = $(this).hasClass("chanle1");
+        if (status) {
+            $(".user-info").show();
+            $(".collection").hide();
+        } else {
+            $(".user-info").hide();
+            $(".collection").show();
+        }
+        $(this).addClass("active").siblings().removeClass("active");
+    });
+});
+</script>
+{% endblock %}
