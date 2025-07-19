@@ -6,23 +6,56 @@ import re
 user_api = Blueprint('user_api', __name__)
 
 
-# --- 注册、登录、退出函数保持不变 ---
 @user_api.route('/register', methods=['POST'])
 def register():
-    # ... (code from previous step)
-    pass
+    """用户注册API接口 (User registration API endpoint)"""
+    data = request.form
+    username = data.get('username')
+    password = data.get('password')
+    email = data.get('email')
+
+    if not all([username, password, email]):
+        return jsonify({'valid': 0, 'msg': '参数不完整 (Incomplete parameters)'})
+
+    user = UserInfo.query.filter_by(name=username).first()
+    if user:
+        return jsonify({'valid': 0, 'msg': '该用户已被注册 (User already registered)'})
+
+    email_user = UserInfo.query.filter_by(email=email).first()
+    if email_user:
+        return jsonify({'valid': 0, 'msg': '该邮箱已被注册 (Email already registered)'})
+
+    hashed_password = generate_password_hash(password)
+
+    new_user = UserInfo(name=username, password=hashed_password, email=email)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({'valid': 1, 'msg': '注册成功 (Registration successful)'})
 
 
 @user_api.route('/login', methods=['POST'])
 def login():
-    # ... (code from previous step)
-    pass
+    """用户登录API接口 (User login API endpoint)"""
+    data = request.form
+    username = data.get('username')
+    password = data.get('password')
+
+    user = UserInfo.query.filter_by(name=username).first()
+
+    if user and check_password_hash(user.password, password):
+        session['user_id'] = user.id
+        session['user_name'] = user.name
+        return jsonify({'valid': 1, 'msg': '登录成功 (Login successful)'})
+
+    return jsonify({'valid': 0, 'msg': '用户名或密码错误 (Incorrect username or password)'})
 
 
 @user_api.route('/logout')
 def logout():
-    # ... (code from previous step)
-    pass
+    """用户退出登录API接口 (User logout API endpoint)"""
+    session.clear()
+    return jsonify({'valid': 1, 'msg': '退出成功 (Logout successful)'})
 
 
 # +++ 新增: 用户信息更新接口 +++
